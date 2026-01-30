@@ -1,0 +1,9 @@
+{
+  "default_agent": "polymarket_react",
+  "agents": {
+    "polymarket_react": {
+      "class": "SpoonReactMCP",
+      "tools": []
+    }
+  }
+}
