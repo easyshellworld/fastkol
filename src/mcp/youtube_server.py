@@ -3,7 +3,10 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import httpx
+from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
+
+load_dotenv()
 
 
 def _env_required(name: str) -> str:
@@ -255,7 +258,39 @@ def youtube_set_thumbnail(
     return {"video_id": video_id, "raw": payload}
 
 
+
+# Expose the ASGI app for uvicorn
+app = server.sse_app()
+
 if __name__ == "__main__":
-    os.environ.setdefault("FASTMCP_HOST", os.getenv("YOUTUBE_MCP_HOST", "127.0.0.1"))
-    os.environ.setdefault("FASTMCP_PORT", os.getenv("YOUTUBE_MCP_PORT", "7020"))
-    server.run(transport="streamable-http")
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--stdio", action="store_true")
+    args = parser.parse_args()
+
+    if args.stdio:
+        server.run()
+    else:
+        import uvicorn
+        host = os.getenv("YOUTUBE_MCP_HOST", "127.0.0.1")
+        port = int(os.getenv("YOUTUBE_MCP_PORT", "8097"))
+        print(f"Starting YouTube MCP Server explicitly on http://{host}:{port}")
+        
+        # Spoon AI Workaround: Redirect POST /sse to /messages
+        async def middleware_app(scope, receive, send):
+            if scope["type"] == "http":
+                method = scope.get("method", "")
+                path = scope.get("path", "")
+                print(f"DEBUG [YouTube]: {method} {path}")
+                if method == "POST" and path == "/sse":
+                    print(f"DEBUG [YouTube]: Redirecting to /messages/")
+                    scope["path"] = "/messages/"
+                    scope["raw_path"] = b"/messages/"
+            try:
+                await app(scope, receive, send)
+            except Exception as e:
+                print(f"ERROR [YouTube]: {e}")
+                raise e
+
+        uvicorn.run(middleware_app, host=host, port=port)
+

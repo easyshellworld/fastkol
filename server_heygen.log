@@ -1,0 +1,6 @@
+Starting HeyGen MCP Server explicitly on http://127.0.0.1:7015
+DEBUG: Registered video_generate alias
+INFO:     Started server process [20520]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:7015 (Press CTRL+C to quit)
