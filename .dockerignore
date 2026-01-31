@@ -1,0 +1,28 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+*.log
+server_*.log
+
+# Large generated files
+*.mp4
+*.txt
+
+# Virtual environments
+venv/
+.env
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Git
+.git
+.gitignore
+
+# OS junk
+.DS_Store
+Thumbs.db
