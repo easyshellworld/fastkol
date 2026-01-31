@@ -23,8 +23,8 @@ def _default_react_prompt() -> str:
     return (
         "fastKOL backend mode.\n"
         "1) Use polymarket_compact.\n"
-        "2) Write a concise Polymarket report (markdown).\n"
-        "3) If video generation is enabled, generate a 30s narration script (female host, facing camera).\n"
+        "2) Write a concise Polymarket report in Chinese(markdown).\n"
+        "3) If video generation is enabled, generate a 15s narration script (female host, facing camera, approx 30 words).\n"
         "4) Prefer YouTube MCP: upload video, set thumbnail if available, update metadata, check status.\n"
         "Return report + narration + any publish result."
     )

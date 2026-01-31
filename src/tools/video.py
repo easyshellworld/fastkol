@@ -48,13 +48,12 @@ def _write_output_metadata(payload: Dict[str, Any], title: str) -> str:
 def _heygen_headers(api_key: str) -> Dict[str, str]:
     return {
         "X-Api-Key": api_key,
-        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
 
 
 def _heygen_base_url() -> str:
-    return os.getenv("HEYGEN_BASE_URL", "https://api.heygen.com/v1").rstrip("/")
+    return os.getenv("HEYGEN_BASE_URL", "https://api.heygen.com").rstrip("/")
 
 
 def _heygen_timeout() -> float:
@@ -92,6 +91,12 @@ def _heygen_generate(script: str, title: str) -> Dict[str, Any]:
     voice_id = os.getenv("HEYGEN_VOICE_ID", "").strip()
     avatar_id = os.getenv("HEYGEN_AVATAR_ID", "").strip()
 
+    if not template_id:
+        if not voice_id:
+            raise ValueError("Missing HEYGEN_VOICE_ID. Please set it in .env (e.g., from HeyGen API docs or dashboard).")
+        if not avatar_id:
+            raise ValueError("Missing HEYGEN_AVATAR_ID. Please set it in .env (e.g., 'Angela-inT-20220820').")
+
     payload: Dict[str, Any]
     if template_id:
         payload = {
@@ -102,29 +107,72 @@ def _heygen_generate(script: str, title: str) -> Dict[str, Any]:
             payload["voice_id"] = voice_id
         if avatar_id:
             payload["avatar_id"] = avatar_id
-    else:
-        payload = {
-            "video_inputs": [
-                {
-                    "character": {"type": "avatar", "avatar_id": avatar_id} if avatar_id else {"type": "avatar"},
-                    "voice": {"type": "text", "voice_id": voice_id, "input_text": script},
-                }
-            ]
-        }
+    from heygen_mcp.api_client import (
+        HeyGenApiClient,
+        VideoGenerateRequest,
+        VideoInput,
+        Character,
+        Voice,
+        Dimension
+    )
+    import asyncio
 
-    endpoint = os.getenv("HEYGEN_GENERATE_PATH", "/video.generate")
-    url = f"{_heygen_base_url()}{endpoint}"
-    with httpx.Client(timeout=_heygen_timeout()) as client:
-        response = client.post(url, json=payload, headers=_heygen_headers(api_key))
-        response.raise_for_status()
-        return response.json()
+    client = HeyGenApiClient(api_key)
+    try:
+        # HeyGen V2 /v2/video/generate structure using official models
+        request = VideoGenerateRequest(
+            title=title,
+            video_inputs=[
+                VideoInput(
+                    character=Character(avatar_id=avatar_id),
+                    voice=Voice(input_text=script, voice_id=voice_id),
+                )
+            ],
+            dimension=Dimension(width=1280, height=720),
+            test=True # Set to True for testing to avoid credit usage
+        )
+        
+        # Run the async call in a block because VideoGenerateTool.execute is sync 
+        # (Wait, actually VideoGenerateTool.execute is NOT sync usually in this codebase, let's verify)
+        # Looking at original code: 'response = client.post(...)' - it was using sync httpx.Client.
+        # HeyGenApiClient is async. We need to handle this.
+        
+        try:
+            import nest_asyncio
+            nest_asyncio.apply()
+        except ImportError:
+            pass
+
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        
+        try:
+            if loop.is_running():
+                # If loop is already running, we have a problem in a sync tool 
+                # that wants to block. But with nest_asyncio it might work.
+                # However, a cleaner way for this project might be to just use await if we can,
+                # but VideoGenerateTool.execute is sync.
+                result = loop.run_until_complete(client.generate_avatar_video(request))
+            else:
+                result = loop.run_until_complete(client.generate_avatar_video(request))
+            
+            return result.model_dump()
+        finally:
+            # Don't close the loop if it's the global one
+            pass
+    except Exception as e:
+        print(f"HeyGen API Error in _heygen_generate: {e}")
+        raise e
 
 
 def _heygen_poll(video_id: str) -> Dict[str, Any]:
     api_key = os.getenv("HEYGEN_API_KEY", "").strip()
     if not api_key:
         raise ValueError("Missing HEYGEN_API_KEY")
-    endpoint = os.getenv("HEYGEN_STATUS_PATH", "/video_status.get")
+    endpoint = os.getenv("HEYGEN_STATUS_PATH", "/v1/video_status.get")
     url = f"{_heygen_base_url()}{endpoint}"
     max_attempts = int(os.getenv("HEYGEN_STATUS_MAX_ATTEMPTS", "30"))
     interval = float(os.getenv("HEYGEN_STATUS_POLL_INTERVAL", "5"))

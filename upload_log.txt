@@ -1,0 +1,6 @@
+Starting upload process...
+Uploading to YouTube...
+
+Upload Success!
+Video ID: y74QbvfQxNQ
+Video URL: https://www.youtube.com/watch?v=y74QbvfQxNQ
