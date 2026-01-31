@@ -74,7 +74,7 @@ MCP 服务集群
 
 ---
 
-📍 本地开发模式
+### 📍 本地开发模式
 
 ## 后端启动 (Python API)
 
@@ -92,48 +92,46 @@ npm install
 npm run dev
 ```
 
-访问：
+### 访问：
 
 Frontend → http://localhost:5173
 
 Backend API → http://localhost:8000
-```
-```
-🐳 Docker 一键部署（推荐）
-1️⃣ 配置环境变量
+
+
+---
+
+### 🐳 Docker 一键部署
+
+## #️⃣ 配置环境变量
+
 cp .env.example .env
 
 
 填写你的 API Key。
 
-```
-```
-2️⃣ 启动服务
+## 2️⃣ 启动服务
 docker compose up -d --build
-```
 
-```
-3️⃣ 访问服务
+## 3️⃣ 访问服务
 
 Frontend: http://localhost:5173
 
 Backend API: http://localhost:8000
-```
-```
-4️⃣ 停止服务
+
+## 4️⃣ 停止服务
 docker compose down
-```
 
-```
+---
 
-🔑 环境变量说明
+### 🔑 环境变量说明
 服务	用途
 OpenAI / Gemini / Claude	内容脚本生成
 Polymarket API	热点数据获取
 视频生成 MCP	视频自动制作
 YouTube API	自动发布视频
-
-📋 自动化工作流
+---
+### 📋 自动化工作流
 启动
  ↓
 获取热点
@@ -145,19 +143,19 @@ YouTube API	自动发布视频
 审核（可选）
  ↓
 发布到 YouTube
-
-📁 项目结构
+---
+### 📁 项目结构
 fastkol/
-├── src/                  # 后端服务
-├── frontend/             # 前端界面
-├── docker-compose.yml   # 一键部署
+├── src/                  
+├── frontend/             
+├── docker-compose.yml   
 ├── Dockerfile.backend
 ├── frontend/Dockerfile
 ├── .dockerignore
 ├── .env.example
 └── readme.md
-
-⚙ MCP 服务集成
+---
+### ⚙ MCP 服务集成
 
 Polymarket MCP — 市场数据
 
@@ -165,7 +163,10 @@ Video MCP — 视频生成
 
 YouTube MCP — 自动上传
 
-❓ 常见问题
+---
+
+
+### ❓ 常见问题
 
 Q: MCP 服务无法连接？
 检查环境变量与 MCP 进程是否启动。
@@ -175,8 +176,8 @@ Q: 视频生成失败？
 
 Q: 上传失败？
 确认 YouTube API 权限。
-
-🚧 开发规划
+---
+### 🚧 开发规划
 
 多语言视频生成
 
@@ -186,10 +187,13 @@ Q: 上传失败？
 
 更多视频生成服务接入
 
-📄 License
+---
+
+### 📄 License
 
 MIT License
 
-🤝 贡献
+---
+### 🤝 贡献
 
 欢迎 PR 与 Issue！
