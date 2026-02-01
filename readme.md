@@ -1,4 +1,4 @@
-# FastKOL - Web3 自动化内容生成与 YouTube 分发系统
+# FastKOL - Web3 自动化内容生成与分发系统 
 
 [![Version](https://img.shields.io/badge/version-1.0-blue)](https://github.com/yourusername/fastKOL)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
